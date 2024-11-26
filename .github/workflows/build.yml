@@ -1,0 +1,42 @@
+name: Build and Test Kotlin Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Set up JDK (Java Development Kit)
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17' # یا نسخه‌ای که پروژه نیاز دارد
+        distribution: 'temurin'
+
+    # 3. Cache Gradle dependencies
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    # 4. Build the project
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    # 5. Run tests
+    - name: Run tests
+      run: ./gradlew test
