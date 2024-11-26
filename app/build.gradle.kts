@@ -79,7 +79,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.cbor)
     implementation(libs.kotlinx.serialization.json)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.jaudiotagger)
+    implementation("net.jthink:jaudiotagger:2.2.3")
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
