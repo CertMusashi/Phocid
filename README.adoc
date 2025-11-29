@@ -43,7 +43,6 @@ If your problem is not covered by this page, you can create an https://github.co
 +
 The scene of audio file tagging is a disaster.
 The best metadata support library I could find is still buggy; I recommend using well-known dedicated software for this task.
-* Deleting files
 * Anything that requires an internet connection
 * Lock screen
 * Playback statistics

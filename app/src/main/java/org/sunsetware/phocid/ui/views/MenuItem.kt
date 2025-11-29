@@ -102,8 +102,12 @@ fun trackMenuItems(
         MenuItem.Button(Strings[R.string.track_details], Icons.Filled.Info) {
             uiManager.openDialog(TrackDetailsDialog(track))
         }
+    val delete =
+        MenuItem.Button(Strings[R.string.track_delete], Icons.Filled.Delete, dangerous = true) {
+            uiManager.openDialog(DeleteTrackDialog(listOf(track)))
+        }
 
-    return queue + playlist + share + MenuItem.Divider + artists + album + details
+    return queue + playlist + share + MenuItem.Divider + artists + album + details + delete
 }
 
 @Stable
@@ -165,6 +169,18 @@ inline fun collectionMenuItems(
             continuation()
         }
     ) + collectionMenuItemsWithoutPlay(tracks, playerManager, uiManager, continuation)
+}
+
+@Stable
+inline fun collectionDeleteMenuItem(
+    crossinline tracks: () -> List<Track>,
+    uiManager: UiManager,
+    crossinline continuation: () -> Unit = {},
+): MenuItem.Button {
+    return MenuItem.Button(Strings[R.string.track_delete], Icons.Filled.Delete, dangerous = true) {
+        uiManager.openDialog(DeleteTrackDialog(tracks()))
+        continuation()
+    }
 }
 
 @Stable
