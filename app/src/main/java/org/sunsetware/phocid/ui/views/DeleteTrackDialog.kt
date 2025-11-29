@@ -59,8 +59,11 @@ class DeleteTrackDialog(private val tracks: List<Track>) : Dialog() {
             // Check if current track is being deleted
             val isCurrentTrackDeleted = currentTrackId != null && currentTrackId in trackIds
             
-            if (isCurrentTrackDeleted) {
-                // If current track is being deleted, skip to next first
+            // Check if all remaining tracks would be deleted
+            val remainingTracksCount = playerState.actualPlayQueue.size - indicesToRemove.size
+            
+            if (isCurrentTrackDeleted && remainingTracksCount > 0) {
+                // If current track is being deleted and there are remaining tracks, skip to next
                 val nextValidIndex = (currentIndex + 1 until playerState.actualPlayQueue.size)
                     .firstOrNull { playerState.actualPlayQueue[it] !in trackIds }
                     ?: (0 until currentIndex)
@@ -75,6 +78,8 @@ class DeleteTrackDialog(private val tracks: List<Track>) : Dialog() {
             for (index in indicesToRemove) {
                 playerManager.removeTrack(index)
             }
+            
+            // If all tracks were deleted, the queue is now empty and playback will stop automatically
             
             viewModel.uiManager.toast(
                 Strings[R.string.toast_track_deleted].icuFormat(trackCount)

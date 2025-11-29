@@ -410,6 +410,13 @@ private fun tryRenameFile(context: android.content.Context, track: Track, newTit
         val extension = FilenameUtils.getExtension(track.path)
         // Sanitize the new title for use as filename
         val sanitizedTitle = newTitle.replace(INVALID_FILENAME_CHARS_REGEX, "_")
+        
+        // Skip if sanitized title is empty or only underscores
+        if (sanitizedTitle.isBlank() || sanitizedTitle.all { it == '_' }) {
+            Log.d("EditTagsDialog", "Skipping rename: sanitized title is invalid")
+            return
+        }
+        
         val newFileName = "$sanitizedTitle.$extension"
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
