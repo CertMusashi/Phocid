@@ -48,40 +48,8 @@ jobs:
           echo "Checking version in build.gradle.kts:"
           grep -E "versionCode|versionName" app/build.gradle.kts
 
-      - name: Create temporary keystore directory
-        run: |
-          KEYSTORE_DIR=$(mktemp -d)
-          echo "KEYSTORE_DIR=$KEYSTORE_DIR" >> $GITHUB_ENV
-          echo "KEYSTORE_PATH=$KEYSTORE_DIR/release.keystore" >> $GITHUB_ENV
-
-      - name: Decode Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_PATH"
-          chmod 600 "$KEYSTORE_PATH"
-
       - name: Build Release APK
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file="$KEYSTORE_PATH" \
-            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
-            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
-            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
-
-      - name: Cleanup keystore
-        if: always()
-        run: |
-          if [ -n "$KEYSTORE_PATH" ] && [ -f "$KEYSTORE_PATH" ]; then
-            rm -f "$KEYSTORE_PATH"
-          fi
-          if [ -n "$KEYSTORE_DIR" ] && [ -d "$KEYSTORE_DIR" ]; then
-            rmdir "$KEYSTORE_DIR" 2>/dev/null || true
-          fi
+        run: ./gradlew assembleRelease
 
       - name: Rename APK
         run: |
