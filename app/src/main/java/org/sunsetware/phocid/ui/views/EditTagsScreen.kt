@@ -5,6 +5,7 @@ package org.sunsetware.phocid.ui.views
 import android.app.Activity
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,6 +57,17 @@ import org.sunsetware.phocid.data.Track
 import org.sunsetware.phocid.globals.Strings
 import org.sunsetware.phocid.utils.icuFormat
 
+/** Supported audio formats for tag editing */
+private val SUPPORTED_TAG_FORMATS = setOf(
+    "mp3", "flac", "ogg", "m4a", "mp4", "wma", "wav", "aif", "aiff", "dsf"
+)
+
+/** Result class for tag saving operation */
+private sealed class SaveTagsResult {
+    data object Success : SaveTagsResult()
+    data class Error(val message: String) : SaveTagsResult()
+}
+
 @Stable
 class EditTagsScreen(private val track: Track) : TopLevelScreen() {
     @Composable
@@ -79,12 +91,28 @@ class EditTagsScreen(private val track: Track) : TopLevelScreen() {
 
         var isSaving by remember { mutableStateOf(false) }
 
+        fun handleSaveResult(result: SaveTagsResult) {
+            isSaving = false
+            when (result) {
+                is SaveTagsResult.Success -> {
+                    uiManager.toast(Strings[R.string.toast_track_tags_saved])
+                    viewModel.scanLibrary(true)
+                    uiManager.closeTopLevelScreen(this@EditTagsScreen)
+                }
+                is SaveTagsResult.Error -> {
+                    uiManager.toast(
+                        Strings[R.string.toast_track_tags_save_failed].icuFormat(result.message)
+                    )
+                }
+            }
+        }
+
         val writeResultLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartIntentSenderForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 coroutineScope.launch {
-                    val success = withContext(Dispatchers.IO) {
+                    val saveResult = withContext(Dispatchers.IO) {
                         saveTags(
                             track.path,
                             title,
@@ -99,16 +127,7 @@ class EditTagsScreen(private val track: Track) : TopLevelScreen() {
                             lyrics
                         )
                     }
-                    isSaving = false
-                    if (success) {
-                        uiManager.toast(Strings[R.string.toast_track_tags_saved])
-                        viewModel.scanLibrary(true)
-                        uiManager.closeTopLevelScreen(this@EditTagsScreen)
-                    } else {
-                        uiManager.toast(
-                            Strings[R.string.toast_track_tags_save_failed].icuFormat("Unknown error")
-                        )
-                    }
+                    handleSaveResult(saveResult)
                 }
             } else {
                 isSaving = false
@@ -134,7 +153,7 @@ class EditTagsScreen(private val track: Track) : TopLevelScreen() {
                     )
                 } else {
                     // For older Android versions, try direct write
-                    val success = withContext(Dispatchers.IO) {
+                    val saveResult = withContext(Dispatchers.IO) {
                         saveTags(
                             track.path,
                             title,
@@ -149,16 +168,7 @@ class EditTagsScreen(private val track: Track) : TopLevelScreen() {
                             lyrics
                         )
                     }
-                    isSaving = false
-                    if (success) {
-                        uiManager.toast(Strings[R.string.toast_track_tags_saved])
-                        viewModel.scanLibrary(true)
-                        uiManager.closeTopLevelScreen(this@EditTagsScreen)
-                    } else {
-                        uiManager.toast(
-                            Strings[R.string.toast_track_tags_save_failed].icuFormat("Unknown error")
-                        )
-                    }
+                    handleSaveResult(saveResult)
                 }
             }
         }
@@ -166,7 +176,7 @@ class EditTagsScreen(private val track: Track) : TopLevelScreen() {
         // Check if format is supported
         val isSupportedFormat = remember(track.path) {
             val extension = FilenameUtils.getExtension(track.path).lowercase()
-            extension in listOf("mp3", "flac", "ogg", "m4a", "mp4", "wma", "wav", "aif", "aiff", "dsf")
+            extension in SUPPORTED_TAG_FORMATS
         }
 
         Scaffold(
@@ -343,77 +353,64 @@ private fun saveTags(
     discNumber: String,
     comment: String,
     lyrics: String
-): Boolean {
+): SaveTagsResult {
     return try {
         val file = File(path)
         val audioFile = AudioFileIO.read(file)
         val tag = audioFile.tagOrCreateAndSetDefault
 
-        // Set or delete each field based on whether it's empty
-        if (title.isNotBlank()) {
-            tag.setField(FieldKey.TITLE, title.trim())
-        } else {
-            try { tag.deleteField(FieldKey.TITLE) } catch (_: Exception) {}
+        // Helper function to safely set or delete a field
+        fun setOrDeleteField(key: FieldKey, value: String) {
+            if (value.isNotBlank()) {
+                tag.setField(key, value.trim())
+            } else {
+                // Deleting a field that doesn't exist may throw in some formats
+                // This is expected behavior and can be safely ignored
+                try {
+                    tag.deleteField(key)
+                } catch (e: Exception) {
+                    Log.d("EditTagsScreen", "Could not delete field $key: ${e.message}")
+                }
+            }
         }
 
-        if (artist.isNotBlank()) {
-            tag.setField(FieldKey.ARTIST, artist.trim())
-        } else {
-            try { tag.deleteField(FieldKey.ARTIST) } catch (_: Exception) {}
+        // Helper function to set or delete numeric fields with validation
+        fun setOrDeleteNumericField(key: FieldKey, value: String) {
+            val trimmedValue = value.trim()
+            if (trimmedValue.isNotBlank()) {
+                // Validate that the value is a valid integer
+                val numericValue = trimmedValue.toIntOrNull()
+                if (numericValue != null && numericValue >= 0) {
+                    tag.setField(key, trimmedValue)
+                } else if (trimmedValue.isNotEmpty()) {
+                    // If it's not a valid number but not empty, still try to set it
+                    // JAudioTagger will handle format-specific validation
+                    tag.setField(key, trimmedValue)
+                }
+            } else {
+                try {
+                    tag.deleteField(key)
+                } catch (e: Exception) {
+                    Log.d("EditTagsScreen", "Could not delete field $key: ${e.message}")
+                }
+            }
         }
 
-        if (album.isNotBlank()) {
-            tag.setField(FieldKey.ALBUM, album.trim())
-        } else {
-            try { tag.deleteField(FieldKey.ALBUM) } catch (_: Exception) {}
-        }
-
-        if (albumArtist.isNotBlank()) {
-            tag.setField(FieldKey.ALBUM_ARTIST, albumArtist.trim())
-        } else {
-            try { tag.deleteField(FieldKey.ALBUM_ARTIST) } catch (_: Exception) {}
-        }
-
-        if (genre.isNotBlank()) {
-            tag.setField(FieldKey.GENRE, genre.trim())
-        } else {
-            try { tag.deleteField(FieldKey.GENRE) } catch (_: Exception) {}
-        }
-
-        if (year.isNotBlank()) {
-            tag.setField(FieldKey.YEAR, year.trim())
-        } else {
-            try { tag.deleteField(FieldKey.YEAR) } catch (_: Exception) {}
-        }
-
-        if (trackNumber.isNotBlank()) {
-            tag.setField(FieldKey.TRACK, trackNumber.trim())
-        } else {
-            try { tag.deleteField(FieldKey.TRACK) } catch (_: Exception) {}
-        }
-
-        if (discNumber.isNotBlank()) {
-            tag.setField(FieldKey.DISC_NO, discNumber.trim())
-        } else {
-            try { tag.deleteField(FieldKey.DISC_NO) } catch (_: Exception) {}
-        }
-
-        if (comment.isNotBlank()) {
-            tag.setField(FieldKey.COMMENT, comment.trim())
-        } else {
-            try { tag.deleteField(FieldKey.COMMENT) } catch (_: Exception) {}
-        }
-
-        if (lyrics.isNotBlank()) {
-            tag.setField(FieldKey.LYRICS, lyrics.trim())
-        } else {
-            try { tag.deleteField(FieldKey.LYRICS) } catch (_: Exception) {}
-        }
+        setOrDeleteField(FieldKey.TITLE, title)
+        setOrDeleteField(FieldKey.ARTIST, artist)
+        setOrDeleteField(FieldKey.ALBUM, album)
+        setOrDeleteField(FieldKey.ALBUM_ARTIST, albumArtist)
+        setOrDeleteField(FieldKey.GENRE, genre)
+        setOrDeleteNumericField(FieldKey.YEAR, year)
+        setOrDeleteNumericField(FieldKey.TRACK, trackNumber)
+        setOrDeleteNumericField(FieldKey.DISC_NO, discNumber)
+        setOrDeleteField(FieldKey.COMMENT, comment)
+        setOrDeleteField(FieldKey.LYRICS, lyrics)
 
         audioFile.commit()
-        true
+        SaveTagsResult.Success
     } catch (e: Exception) {
-        e.printStackTrace()
-        false
+        Log.e("EditTagsScreen", "Error saving tags for $path", e)
+        SaveTagsResult.Error(e.message ?: "Unknown error")
     }
 }
