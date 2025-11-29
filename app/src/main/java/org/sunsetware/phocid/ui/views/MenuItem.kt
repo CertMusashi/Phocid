@@ -102,12 +102,16 @@ fun trackMenuItems(
         MenuItem.Button(Strings[R.string.track_details], Icons.Filled.Info) {
             uiManager.openDialog(TrackDetailsDialog(track))
         }
+    val editTags =
+        MenuItem.Button(Strings[R.string.track_edit_tags], Icons.Filled.Edit) {
+            uiManager.openTopLevelScreen(EditTagsScreen(track))
+        }
     val delete =
         MenuItem.Button(Strings[R.string.track_delete], Icons.Filled.Delete, dangerous = true) {
             uiManager.openDialog(DeleteTrackDialog(listOf(track)))
         }
 
-    return queue + playlist + share + MenuItem.Divider + artists + album + details + delete
+    return queue + playlist + share + MenuItem.Divider + artists + album + details + editTags + delete
 }
 
 @Stable
