@@ -103,6 +103,7 @@ import org.sunsetware.phocid.ui.components.TabIndicator
 import org.sunsetware.phocid.ui.components.multiSelectClickable
 import org.sunsetware.phocid.ui.theme.hashColor
 import org.sunsetware.phocid.ui.views.MenuItem
+import org.sunsetware.phocid.ui.views.collectionDeleteMenuItem
 import org.sunsetware.phocid.ui.views.collectionMenuItems
 import org.sunsetware.phocid.ui.views.playlistCollectionMenuItems
 import org.sunsetware.phocid.ui.views.playlistCollectionMultiSelectMenuItems
@@ -231,6 +232,10 @@ class LibraryScreenHomeViewState(
                     collectionMenuItems(
                         { listOf(track) + others.flatMap { it.tracks() } },
                         viewModel.playerManager,
+                        viewModel.uiManager,
+                        continuation,
+                    ) + collectionDeleteMenuItem(
+                        { listOf(track) + others.flatMap { it.tracks() } },
                         viewModel.uiManager,
                         continuation,
                     )
@@ -476,6 +481,10 @@ class LibraryScreenHomeViewState(
                             collectionMenuItems(
                                 { listOf(track) + others.flatMap { it.tracks() } },
                                 viewModel.playerManager,
+                                viewModel.uiManager,
+                                continuation,
+                            ) + collectionDeleteMenuItem(
+                                { listOf(track) + others.flatMap { it.tracks() } },
                                 viewModel.uiManager,
                                 continuation,
                             )

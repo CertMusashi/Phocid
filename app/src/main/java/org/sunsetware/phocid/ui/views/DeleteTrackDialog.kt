@@ -36,20 +36,63 @@ class DeleteTrackDialog(private val tracks: List<Track>) : Dialog() {
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
         val uris = remember { tracks.map { it.uri } }
+        val trackIds = remember { tracks.map { it.id }.toSet() }
         val trackCount = tracks.size
         val singleTrackTitle = rememberSaveable {
             tracks.firstOrNull()?.displayTitle ?: ""
+        }
+
+        fun handleDeletionSuccess() {
+            // Remove deleted tracks from play queue
+            val playerManager = viewModel.playerManager
+            val playerState = playerManager.state.value
+            val currentIndex = playerState.currentIndex
+            val currentTrackId = playerState.actualPlayQueue.getOrNull(currentIndex)
+            
+            // Find indices to remove (in reverse order to avoid index shifting issues)
+            val indicesToRemove = playerState.actualPlayQueue
+                .mapIndexedNotNull { index, trackId -> 
+                    if (trackId in trackIds) index else null 
+                }
+                .sortedDescending()
+            
+            // Check if current track is being deleted
+            val isCurrentTrackDeleted = currentTrackId != null && currentTrackId in trackIds
+            
+            // Check if all remaining tracks would be deleted
+            val remainingTracksCount = playerState.actualPlayQueue.size - indicesToRemove.size
+            
+            if (isCurrentTrackDeleted && remainingTracksCount > 0) {
+                // If current track is being deleted and there are remaining tracks, skip to next
+                val nextValidIndex = (currentIndex + 1 until playerState.actualPlayQueue.size)
+                    .firstOrNull { playerState.actualPlayQueue[it] !in trackIds }
+                    ?: (0 until currentIndex)
+                        .firstOrNull { playerState.actualPlayQueue[it] !in trackIds }
+                
+                if (nextValidIndex != null) {
+                    playerManager.seekTo(nextValidIndex)
+                }
+            }
+            
+            // Remove tracks from queue in reverse order
+            for (index in indicesToRemove) {
+                playerManager.removeTrack(index)
+            }
+            
+            // If all tracks were deleted, the queue is now empty and playback will stop automatically
+            
+            viewModel.uiManager.toast(
+                Strings[R.string.toast_track_deleted].icuFormat(trackCount)
+            )
+            // Trigger a library rescan to refresh the track list
+            viewModel.scanLibrary(true)
         }
 
         val deleteResultLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartIntentSenderForResult()
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.uiManager.toast(
-                    Strings[R.string.toast_track_deleted].icuFormat(trackCount)
-                )
-                // Trigger a library rescan to refresh the track list
-                viewModel.scanLibrary(true)
+                handleDeletionSuccess()
             } else {
                 viewModel.uiManager.toast(
                     Strings[R.string.toast_track_delete_failed].icuFormat(trackCount)
@@ -81,10 +124,7 @@ class DeleteTrackDialog(private val tracks: List<Track>) : Dialog() {
                             deleteTracksLegacy(context.contentResolver, uris)
                         }
                         if (success) {
-                            viewModel.uiManager.toast(
-                                Strings[R.string.toast_track_deleted].icuFormat(trackCount)
-                            )
-                            viewModel.scanLibrary(true)
+                            handleDeletionSuccess()
                         } else {
                             viewModel.uiManager.toast(
                                 Strings[R.string.toast_track_delete_failed].icuFormat(trackCount)
