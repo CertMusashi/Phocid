@@ -373,6 +373,13 @@
     <string name="track_play_next">Play next</string>
     <string name="track_remove_from_queue">Remove from queue</string>
     <string name="track_share">Share</string>
+    <string name="track_delete">Delete file</string>
+    <string name="track_delete_single_dialog_title">Delete file?</string>
+    <string name="track_delete_single_dialog_body">"{0}" will be permanently deleted from your device</string>
+    <string name="track_delete_multiple_dialog_title">Delete {0, plural, one {# file} other {# files}}?</string>
+    <string name="track_delete_multiple_dialog_body">{0, plural, one {# track} other {# tracks}} will be permanently deleted from your device</string>
+    <string name="toast_track_deleted">{0, plural, one {# track} other {# tracks}} deleted</string>
+    <string name="toast_track_delete_failed">Failed to delete {0, plural, one {# track} other {# tracks}}</string>
     <string name="track_view_album">View album “{0}”</string>
     <string name="track_view_artist">View artist “{0}”</string>
     <!-- Settings of how the list is displayed. Unrelated to "view album" etc. -->
