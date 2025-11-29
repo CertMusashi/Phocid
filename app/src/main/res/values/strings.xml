@@ -382,6 +382,22 @@
     <string name="toast_track_delete_failed">Failed to delete {0, plural, one {# track} other {# tracks}}</string>
     <string name="track_view_album">View album “{0}”</string>
     <string name="track_view_artist">View artist “{0}”</string>
+    <string name="track_edit_tags">Edit tags</string>
+    <string name="track_edit_tags_title">Edit tags</string>
+    <string name="track_edit_tags_title_field">Title</string>
+    <string name="track_edit_tags_artist_field">Artist</string>
+    <string name="track_edit_tags_album_field">Album</string>
+    <string name="track_edit_tags_album_artist_field">Album artist</string>
+    <string name="track_edit_tags_genre_field">Genre</string>
+    <string name="track_edit_tags_year_field">Year</string>
+    <string name="track_edit_tags_track_number_field">Track number</string>
+    <string name="track_edit_tags_disc_number_field">Disc number</string>
+    <string name="track_edit_tags_comment_field">Comment</string>
+    <string name="track_edit_tags_lyrics_field">Lyrics</string>
+    <string name="track_edit_tags_save">Save</string>
+    <string name="toast_track_tags_saved">Tags saved successfully</string>
+    <string name="toast_track_tags_save_failed">Failed to save tags: {0}</string>
+    <string name="track_edit_tags_unsupported_format">Tag editing is not supported for this format</string>
     <!-- Settings of how the list is displayed. Unrelated to "view album" etc. -->
     <string name="view_settings">View settings</string>
     <string name="view_settings_grid_size">Grid size</string>
