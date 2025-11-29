@@ -56,6 +56,9 @@ private val SUPPORTED_TAG_FORMATS = setOf(
     "mp3", "flac", "ogg", "m4a", "mp4", "wma", "wav", "aif", "aiff", "dsf"
 )
 
+/** Regex for sanitizing filename - removes invalid characters */
+private val INVALID_FILENAME_CHARS_REGEX = Regex("[\\\\/:*?\"<>|]")
+
 /** Result class for tag saving operation */
 private sealed class EditTagsSaveResult {
     data object Success : EditTagsSaveResult()
@@ -406,7 +409,7 @@ private fun tryRenameFile(context: android.content.Context, track: Track, newTit
     try {
         val extension = FilenameUtils.getExtension(track.path)
         // Sanitize the new title for use as filename
-        val sanitizedTitle = newTitle.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+        val sanitizedTitle = newTitle.replace(INVALID_FILENAME_CHARS_REGEX, "_")
         val newFileName = "$sanitizedTitle.$extension"
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
