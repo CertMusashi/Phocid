@@ -104,7 +104,7 @@ fun trackMenuItems(
         }
     val editTags =
         MenuItem.Button(Strings[R.string.track_edit_tags], Icons.Filled.Edit) {
-            uiManager.openTopLevelScreen(EditTagsScreen(track))
+            uiManager.openDialog(EditTagsDialog(track))
         }
     val delete =
         MenuItem.Button(Strings[R.string.track_delete], Icons.Filled.Delete, dangerous = true) {
