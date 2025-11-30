@@ -38,7 +38,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import java.io.File
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FilenameUtils
@@ -112,10 +111,7 @@ class EditTagsDialog(private val track: Track) : Dialog() {
             when (result) {
                 is EditTagsSaveResult.Success -> {
                     uiManager.toast(Strings[R.string.toast_track_tags_saved])
-                    coroutineScope.launch {
-                        delay(RESCAN_DELAY_MS)
-                        viewModel.scanLibrary(true)
-                    }
+                    viewModel.launchDelayedLibraryScan(RESCAN_DELAY_MS)
                     uiManager.closeDialog()
                 }
                 is EditTagsSaveResult.Error -> {
