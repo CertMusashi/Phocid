@@ -61,7 +61,7 @@ private val SUPPORTED_TAG_FORMATS = setOf(
 private val INVALID_FILENAME_CHARS_REGEX = Regex("[\\\\/:*?\"<>|]")
 
 /** Delay in milliseconds before rescanning library after tag edit to allow file system sync */
-private const val RESCAN_DELAY_MS = 1000L
+private const val RESCAN_DELAY_MS = 2000L
 
 /** Result class for tag saving operation */
 private sealed class EditTagsSaveResult {
