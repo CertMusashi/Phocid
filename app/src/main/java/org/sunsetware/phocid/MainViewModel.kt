@@ -168,6 +168,17 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         GlobalData.preferences.update(transform)
     }
 
+    /**
+     * Launches a delayed library scan using viewModelScope to ensure the job
+     * is not cancelled when the calling composable is removed from composition.
+     */
+    fun launchDelayedLibraryScan(delayMs: Long) {
+        viewModelScope.launch {
+            delay(delayMs)
+            scanLibrary(true)
+        }
+    }
+
     fun updateTabInfo(index: Int, transform: (LibraryScreenTabInfo) -> LibraryScreenTabInfo) {
         GlobalData.preferences.update { preferences ->
             val type = preferences.tabs[index].type
