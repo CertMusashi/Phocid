@@ -2,7 +2,7 @@
 :note-caption: ℹ️
 :warning-caption: ⚠️
 
-image:1000007041-removebg-preview.png[Icon,64px]
+image:phocid-icon.png[Icon,64px]
 image:https://img.shields.io/f-droid/v/org.sunsetware.phocid[F-Droid Version,link=https://f-droid.org/en/packages/org.sunsetware.phocid/]
 image:https://img.shields.io/badge/official-website-blue[Official website,link=https://sunsetware.org/phocid]
 image:https://img.shields.io/badge/works_on-my_machine-yellow[Works on my machine]

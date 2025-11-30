@@ -60,6 +60,9 @@ private val SUPPORTED_TAG_FORMATS = setOf(
 /** Regex for sanitizing filename - removes invalid characters */
 private val INVALID_FILENAME_CHARS_REGEX = Regex("[\\\\/:*?\"<>|]")
 
+/** Delay in milliseconds before rescanning library after tag edit to allow file system sync */
+private const val RESCAN_DELAY_MS = 1000L
+
 /** Result class for tag saving operation */
 private sealed class EditTagsSaveResult {
     data object Success : EditTagsSaveResult()
@@ -110,7 +113,7 @@ class EditTagsDialog(private val track: Track) : Dialog() {
                 is EditTagsSaveResult.Success -> {
                     uiManager.toast(Strings[R.string.toast_track_tags_saved])
                     coroutineScope.launch {
-                        delay(1000) // Wait 1 second for file system to sync before rescanning
+                        delay(RESCAN_DELAY_MS)
                         viewModel.scanLibrary(true)
                     }
                     uiManager.closeDialog()
