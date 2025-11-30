@@ -2,7 +2,7 @@
 :note-caption: ℹ️
 :warning-caption: ⚠️
 
-image:metadata/en-US/images/icon.png[Icon,64px]
+image:1000007041-removebg-preview.png[Icon,64px]
 image:https://img.shields.io/f-droid/v/org.sunsetware.phocid[F-Droid Version,link=https://f-droid.org/en/packages/org.sunsetware.phocid/]
 image:https://img.shields.io/badge/official-website-blue[Official website,link=https://sunsetware.org/phocid]
 image:https://img.shields.io/badge/works_on-my_machine-yellow[Works on my machine]
@@ -39,10 +39,6 @@ If your problem is not covered by this page, you can create an https://github.co
 
 == Missing features that are intentionally left out
 
-* Tag editing
-+
-The scene of audio file tagging is a disaster.
-The best metadata support library I could find is still buggy; I recommend using well-known dedicated software for this task.
 * Anything that requires an internet connection
 * Lock screen
 * Playback statistics
@@ -83,12 +79,6 @@ I don't accept donations.
 * zh-Hant: https://github.com/kisaragi-hiu[kisaragi-hiu]
 
 == License
-
-=== App icon artwork
-
-....
-This work by tjysunset is licensed under CC BY-SA 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-sa/4.0/
-....
 
 === Code
 

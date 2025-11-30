@@ -65,7 +65,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         if (!initializationStarted.getAndSet(true)) {
             viewModelScope.launch {
                 while (!GlobalData.initialized.get()) {
-                    delay(1)
+                    delay(10)
                 }
                 playerManager =
                     PlayerManager(GlobalData.playerState, GlobalData.playerTransientState)
@@ -121,7 +121,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                                 mediaScannerSignal.set(true)
                             }
                             while (!mediaScannerSignal.get()) {
-                                delay(1)
+                                delay(50)
                             }
                         }
 
@@ -144,7 +144,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                                 GlobalData.libraryIndex.value.flowVersion <
                                     newTrackIndex.flowVersion
                             ) {
-                                delay(1)
+                                delay(10)
                             }
                             Log.d("Phocid", "Library scan completed")
                         } else {
@@ -157,7 +157,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
                     }
                 } else {
                     while (scanMutex.isLocked) {
-                        delay(1)
+                        delay(50)
                     }
                 }
             }
