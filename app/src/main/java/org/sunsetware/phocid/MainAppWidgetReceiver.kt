@@ -87,7 +87,7 @@ class MainAppWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         while (!GlobalData.initialized.get()) {
-            delay(10)
+            delay(1)
         }
         val coroutineScope = CoroutineScope(coroutineContext + Dispatchers.IO)
         val trackAndArtworkState =

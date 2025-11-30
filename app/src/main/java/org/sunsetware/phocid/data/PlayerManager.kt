@@ -62,7 +62,7 @@ class PlayerManager(
         )
 
         while (!completed.get()) {
-            delay(10)
+            delay(1)
         }
     }
 
