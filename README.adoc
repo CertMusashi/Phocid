@@ -39,10 +39,6 @@ If your problem is not covered by this page, you can create an https://github.co
 
 == Missing features that are intentionally left out
 
-* Tag editing
-+
-The scene of audio file tagging is a disaster.
-The best metadata support library I could find is still buggy; I recommend using well-known dedicated software for this task.
 * Anything that requires an internet connection
 * Lock screen
 * Playback statistics
@@ -83,12 +79,6 @@ I don't accept donations.
 * zh-Hant: https://github.com/kisaragi-hiu[kisaragi-hiu]
 
 == License
-
-=== App icon artwork
-
-....
-This work by tjysunset is licensed under CC BY-SA 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-sa/4.0/
-....
 
 === Code
 

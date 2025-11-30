@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FilenameUtils
@@ -58,6 +59,9 @@ private val SUPPORTED_TAG_FORMATS = setOf(
 
 /** Regex for sanitizing filename - removes invalid characters */
 private val INVALID_FILENAME_CHARS_REGEX = Regex("[\\\\/:*?\"<>|]")
+
+/** Delay in milliseconds before rescanning library after tag edit to allow file system sync */
+private const val RESCAN_DELAY_MS = 1000L
 
 /** Result class for tag saving operation */
 private sealed class EditTagsSaveResult {
@@ -108,7 +112,10 @@ class EditTagsDialog(private val track: Track) : Dialog() {
             when (result) {
                 is EditTagsSaveResult.Success -> {
                     uiManager.toast(Strings[R.string.toast_track_tags_saved])
-                    viewModel.scanLibrary(true)
+                    coroutineScope.launch {
+                        delay(RESCAN_DELAY_MS)
+                        viewModel.scanLibrary(true)
+                    }
                     uiManager.closeDialog()
                 }
                 is EditTagsSaveResult.Error -> {
